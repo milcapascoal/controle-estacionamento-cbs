@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db } from './firebase/config';
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -106,14 +107,14 @@ function App() {
       onSnapshot(collection(db, 'users'), snapshot => {
         const data = snapshot.docs.map(doc => ({ ...doc.data() } as User));
         setUsers(data);
+        // Uma vez que o último listener de dados é estabelecido, podemos remover a tela de carregamento.
+        // Isso é mais responsivo do que esperar por um tempo fixo.
+        setDataLoading(false);
       }),
     ];
-    
-    const timer = setTimeout(() => setDataLoading(false), 1200);
 
     return () => {
       unsubscribes.forEach(unsub => unsub());
-      clearTimeout(timer);
     };
   }, [currentUser]);
 
