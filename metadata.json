@@ -1,0 +1,5 @@
+{
+  "name": "Controle de Estacionamento - CBS",
+  "description": "Um aplicativo para gerenciar a entrada e saída de veículos no estacionamento da universidade, registrando informações dos veículos e horários.",
+  "requestFramePermissions": []
+}
