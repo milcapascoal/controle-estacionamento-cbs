@@ -151,6 +151,19 @@ function App() {
         await addDoc(collection(db, "parkingLogs"), { ...logData, operatorName, plate: vehicle.plate });
     }
   };
+  
+  const handleQuickExit = async (logId: string) => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const exitTime = `${hours}:${minutes}`;
+
+    const logDocRef = doc(db, "parkingLogs", logId);
+    await updateDoc(logDocRef, { 
+        exitTime,
+        operatorName: 'Sistema (Saída Rápida)',
+    });
+  };
 
   const handleOpenEditModal = (log: ParkingLog) => {
     const vehicle = vehicles.find(v => v.id === log.vehicleId);
@@ -220,6 +233,7 @@ function App() {
           parkingLogs={parkingLogs}
           onSaveLog={handleSaveLog}
           onOpenEditModal={handleOpenEditModal}
+          onQuickExit={handleQuickExit}
           stats={occupancyStats}
           isLoading={dataLoading}
         />

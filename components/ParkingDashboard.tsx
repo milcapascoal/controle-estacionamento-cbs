@@ -3,17 +3,19 @@ import { Vehicle, ParkingLog, DetailedOccupancyStats } from '../types';
 import LogForm from './LogForm';
 import DailyLogList from './DailyLogList';
 import OccupancyStats from './OccupancyStats';
+import QuickAccessPanel from './QuickAccessPanel';
 
 interface ParkingDashboardProps {
   vehicles: Vehicle[];
   parkingLogs: ParkingLog[];
   onSaveLog: (logData: Omit<ParkingLog, 'id' | 'plate' | 'operatorName'>) => void;
   onOpenEditModal: (log: ParkingLog) => void;
+  onQuickExit: (logId: string) => void;
   stats: DetailedOccupancyStats;
   isLoading: boolean;
 }
 
-const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLogs, onSaveLog, onOpenEditModal, stats, isLoading }) => {
+const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLogs, onSaveLog, onOpenEditModal, onQuickExit, stats, isLoading }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const dailyLogs = useMemo(() => {
@@ -21,6 +23,10 @@ const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLo
       .filter(log => log.date === selectedDate)
       .sort((a, b) => a.entryTime.localeCompare(b.entryTime));
   }, [parkingLogs, selectedDate]);
+  
+  const activeLogs = useMemo(() => {
+    return dailyLogs.filter(log => !log.exitTime);
+  }, [dailyLogs]);
 
   return (
     <div className="space-y-8">
@@ -50,7 +56,13 @@ const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLo
             />
           </div>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8 flex flex-col">
+           <QuickAccessPanel 
+                vehicles={vehicles}
+                activeLogs={activeLogs}
+                onQuickExit={onQuickExit}
+                isLoading={isLoading}
+            />
            <DailyLogList 
               dailyLogs={dailyLogs} 
               vehicles={vehicles} 
