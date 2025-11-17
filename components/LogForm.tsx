@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Vehicle, ParkingLog } from '../types';
 
 interface LogFormProps {
@@ -7,15 +7,21 @@ interface LogFormProps {
     dailyLogs: ParkingLog[];
     onSaveLog: (logData: Omit<ParkingLog, 'id' | 'plate' | 'operatorName'>) => void;
     selectedDate: string;
+    isLoading: boolean;
 }
 
-const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selectedDate }) => {
+const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selectedDate, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<Vehicle[]>([]);
     const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
     const [entryTime, setEntryTime] = useState('');
     const [exitTime, setExitTime] = useState<string | null>('');
     const [message, setMessage] = useState('');
+
+    const dailyLogsRef = useRef(dailyLogs);
+    useEffect(() => {
+        dailyLogsRef.current = dailyLogs;
+    }, [dailyLogs]);
 
     const resetForm = useCallback(() => {
         setSelectedVehicle(null);
@@ -35,7 +41,7 @@ const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selec
         setSearchTerm(vehicle.plate);
         setSearchResults([]);
         
-        const existingLog = dailyLogs.find(log => log.vehicleId === vehicle.id);
+        const existingLog = dailyLogsRef.current.find(log => log.vehicleId === vehicle.id);
         if (existingLog) {
             setEntryTime(existingLog.entryTime);
             setExitTime(existingLog.exitTime);
@@ -47,7 +53,7 @@ const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selec
             setExitTime('');
         }
         setMessage('');
-    }, [dailyLogs]);
+    }, []);
 
     useEffect(() => {
         if (selectedVehicle && searchTerm.toUpperCase() === selectedVehicle.plate.toUpperCase()) {
@@ -75,7 +81,6 @@ const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selec
             }
         } else {
             resetForm();
-            if (searchTerm) setSearchTerm(searchTerm);
         }
     }, [searchTerm, vehicles, resetForm, handleSelectVehicle, selectedVehicle]);
 
@@ -107,9 +112,10 @@ const LogForm: React.FC<LogFormProps> = ({ vehicles, dailyLogs, onSaveLog, selec
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Digite a placa ou nome"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder={isLoading ? "Carregando veículos..." : "Digite a placa ou nome"}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                     autoComplete="off"
+                    disabled={isLoading}
                 />
             </div>
             

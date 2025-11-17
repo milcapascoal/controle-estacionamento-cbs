@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: "controle-de-acesso---cbs.firebaseapp.com",
   projectId: "controle-de-acesso---cbs",
-  storageBucket: "controle-de-acesso---cbs.appspot.com",
+  storageBucket: "controle-de-acesso---cbs.firebasestorage.app",
   messagingSenderId: "1010444702418",
   appId: "1:1010444702418:web:b4c41410772d122637d30b"
 };

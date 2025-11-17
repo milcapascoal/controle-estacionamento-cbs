@@ -1,12 +1,5 @@
 export type UniversityLink = 'Discente' | 'Servidor Docente' | 'Servidor Técnico Administrativo' | 'Visitante';
 export type VehicleType = 'Carro' | 'Moto' | 'Bicicleta';
-export type UserRole = 'Administrador' | 'Operador';
-
-export interface User {
-  uid: string; // ID único do Firebase Auth
-  email: string;
-  role: UserRole;
-}
 
 export interface EditHistoryLog {
   timestamp: string;

@@ -10,9 +10,10 @@ interface ParkingDashboardProps {
   onSaveLog: (logData: Omit<ParkingLog, 'id' | 'plate' | 'operatorName'>) => void;
   onOpenEditModal: (log: ParkingLog) => void;
   stats: DetailedOccupancyStats;
+  isLoading: boolean;
 }
 
-const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLogs, onSaveLog, onOpenEditModal, stats }) => {
+const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLogs, onSaveLog, onOpenEditModal, stats, isLoading }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const dailyLogs = useMemo(() => {
@@ -23,7 +24,7 @@ const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLo
 
   return (
     <div className="space-y-8">
-      <OccupancyStats stats={stats} />
+      <OccupancyStats stats={stats} isLoading={isLoading} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -45,6 +46,7 @@ const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLo
               onSaveLog={onSaveLog} 
               selectedDate={selectedDate}
               dailyLogs={dailyLogs}
+              isLoading={isLoading}
             />
           </div>
         </div>
@@ -54,6 +56,7 @@ const ParkingDashboard: React.FC<ParkingDashboardProps> = ({ vehicles, parkingLo
               vehicles={vehicles} 
               selectedDate={selectedDate}
               onOpenEditModal={onOpenEditModal}
+              isLoading={isLoading}
            />
         </div>
       </div>

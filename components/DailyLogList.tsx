@@ -6,6 +6,7 @@ interface DailyLogListProps {
   vehicles: Vehicle[];
   selectedDate: string;
   onOpenEditModal: (log: ParkingLog) => void;
+  isLoading: boolean;
 }
 
 const EditIcon = () => (
@@ -22,7 +23,7 @@ const SearchIcon = () => (
 );
 
 
-const DailyLogList: React.FC<DailyLogListProps> = ({ dailyLogs, vehicles, selectedDate, onOpenEditModal }) => {
+const DailyLogList: React.FC<DailyLogListProps> = ({ dailyLogs, vehicles, selectedDate, onOpenEditModal, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const formatDate = (dateString: string) => {
@@ -66,7 +67,12 @@ const DailyLogList: React.FC<DailyLogListProps> = ({ dailyLogs, vehicles, select
         </div>
       </div>
       <div className="overflow-x-auto">
-        {dailyLogs.length > 0 ? (
+        {isLoading ? (
+            <div className="text-center py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+                <p className="mt-3 text-slate-500">Carregando registros...</p>
+            </div>
+        ) : dailyLogs.length > 0 ? (
             filteredLogs.length > 0 ? (
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">

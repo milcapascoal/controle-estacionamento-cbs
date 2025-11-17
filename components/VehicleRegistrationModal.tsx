@@ -5,7 +5,6 @@ import { Vehicle, UniversityLink, VehicleType } from '../types';
 interface VehicleRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // FIX: Updated onRegister to return a Promise to match the async function from App.tsx.
   onRegister: (vehicle: Omit<Vehicle, 'registeredBy' | 'id'>) => Promise<{ success: boolean, message: string }>;
 }
 
@@ -18,8 +17,8 @@ const VehicleRegistrationModal: React.FC<VehicleRegistrationModalProps> = ({ isO
   const [vehicleType, setVehicleType] = useState<VehicleType>('Carro');
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  // FIX: Made handleSubmit async to allow awaiting the onRegister function.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isBicycle = vehicleType === 'Bicicleta';
@@ -29,25 +28,35 @@ const VehicleRegistrationModal: React.FC<VehicleRegistrationModalProps> = ({ isO
         setIsSuccess(false);
         return;
     }
-
-    const vehiclePlate = isBicycle ? `BICI-${Date.now()}` : plate.toUpperCase();
-
-    const result = await onRegister({ 
-        plate: vehiclePlate, 
-        ownerName, 
-        universityLink, 
-        model, 
-        color, 
-        type: vehicleType 
-    });
     
-    setMessage(result.message);
-    setIsSuccess(result.success);
+    setIsRegistering(true);
+    setMessage('');
 
-    if (result.success) {
-      setTimeout(() => {
-        handleClose();
-      }, 1500);
+    try {
+        const vehiclePlate = isBicycle ? `BICI-${Date.now()}` : plate.toUpperCase();
+        const result = await onRegister({ 
+            plate: vehiclePlate, 
+            ownerName, 
+            universityLink, 
+            model, 
+            color, 
+            type: vehicleType 
+        });
+        
+        setMessage(result.message);
+        setIsSuccess(result.success);
+
+        if (result.success) {
+          setTimeout(() => {
+            handleClose();
+          }, 1500);
+        }
+    } catch (error) {
+        console.error("Erro ao cadastrar veículo:", error);
+        setMessage("Ocorreu um erro ao cadastrar o veículo. Por favor, tente novamente.");
+        setIsSuccess(false);
+    } finally {
+        setIsRegistering(false);
     }
   };
   
@@ -78,7 +87,6 @@ const VehicleRegistrationModal: React.FC<VehicleRegistrationModalProps> = ({ isO
           {vehicleType !== 'Bicicleta' && (
             <div>
               <label htmlFor="plate" className="block text-sm font-medium text-slate-600">Placa</label>
-              {/* FIX: Changed required={vehicleType !== 'Bicicleta'} to just 'required' because it's inside a block where this condition is already true, fixing the comparison error. */}
               <input type="text" id="plate" value={plate} onChange={e => setPlate(e.target.value.toUpperCase())} className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required />
             </div>
           )}
@@ -123,8 +131,10 @@ const VehicleRegistrationModal: React.FC<VehicleRegistrationModalProps> = ({ isO
           )}
 
           <div className="flex justify-end pt-4 space-x-2">
-            <button type="button" onClick={handleClose} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">Cancelar</button>
-            <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Cadastrar</button>
+            <button type="button" onClick={handleClose} disabled={isRegistering} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-50">Cancelar</button>
+            <button type="submit" disabled={isRegistering} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isRegistering ? 'Cadastrando...' : 'Cadastrar'}
+            </button>
           </div>
         </form>
       </div>

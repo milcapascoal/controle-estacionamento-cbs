@@ -1,6 +1,11 @@
 import React from 'react';
 import { DetailedOccupancyStats } from '../types';
 
+interface OccupancyStatsProps {
+    stats: DetailedOccupancyStats;
+    isLoading: boolean;
+}
+
 interface VehicleTypeStatCardProps {
     title: string;
     occupied: number;
@@ -25,6 +30,22 @@ const BicycleIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
         <path d="M15.5,4.5c0-1.38-1.12-2.5-2.5-2.5S10.5,3.12,10.5,4.5S11.62,7,13,7S15.5,5.88,15.5,4.5z M7,4.5C7,3.12,5.88,2,4.5,2S2,3.12,2,4.5S3.12,7,4.5,7S7,5.88,7,4.5z M13,9c-2.07,0-3.81,1.24-4.58,3H13v-1.5c0-0.28,0.22-0.5,0.5-0.5s0.5,0.22,0.5,0.5V11h1.5c0.28,0,0.5-0.22,0.5-0.5S15.28,10,15,10h-1.15C13.55,9.39,13.29,9.15,13,9z M4.5,9C4.21,9.15,3.95,9.39,3.65,10H2.5C2.22,10,2,10.22,2,10.5S2.22,11,2.5,11H4v1.5C4,12.78,4.22,13,4.5,13S5,12.78,5,12.5V12h2.58C6.81,10.24,5.07,9,3,9C2.71,9,2.45,9.07,2.2,9.2L2.5,15h1.88l1.73-4.32C6.18,10.26,6,9.89,6,9.5C6,8.12,7.12,7,8.5,7h3C11.78,7,12,7.22,12,7.5S11.78,8,11.5,8h-3C7.67,8,7,8.67,7,9.5c0,0.39,0.18,0.76,0.47,1.18L5.62,15H7.5l0.71-1.78c0.26,0.1,0.53,0.18,0.81,0.22l-0.7,1.56H12l1.5-4h-0.6c-0.28,0-0.5,0.22-0.5,0.5s0.22,0.5,0.5,0.5H14c0.57,0,1.06,0.41,1.11,0.96l0.55,4.54H17l-0.66-5.5C16.27,9.65,15.68,9,14.88,9H13z"/>
     </svg>
+);
+
+const StatCardSkeleton: React.FC = () => (
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col justify-between animate-pulse">
+        <div className="p-5">
+            <div className="flex items-start justify-between">
+                <div>
+                    <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+                    <div className="h-10 bg-slate-300 rounded w-32 mb-3"></div>
+                    <div className="h-4 bg-slate-200 rounded w-28"></div>
+                </div>
+                <div className="p-4 rounded-full bg-slate-300 h-16 w-16"></div>
+            </div>
+        </div>
+        <div className="w-full bg-slate-200 h-2.5"></div>
+    </div>
 );
 
 const VehicleTypeStatCard: React.FC<VehicleTypeStatCardProps> = ({ title, occupied, total, icon, progressColor }) => {
@@ -58,7 +79,7 @@ const VehicleTypeStatCard: React.FC<VehicleTypeStatCardProps> = ({ title, occupi
 };
 
 
-const OccupancyStats: React.FC<{ stats: DetailedOccupancyStats }> = ({ stats }) => {
+const OccupancyStats: React.FC<OccupancyStatsProps> = ({ stats, isLoading }) => {
   const getProgressColor = (occupied: number, total: number) => {
     if (total === 0) return 'bg-slate-400';
     const percentage = (occupied / total) * 100;
@@ -66,6 +87,16 @@ const OccupancyStats: React.FC<{ stats: DetailedOccupancyStats }> = ({ stats }) 
     if (percentage > 60) return 'bg-amber-500';
     return 'bg-green-500';
   };
+
+  if (isLoading) {
+      return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+          </div>
+      );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

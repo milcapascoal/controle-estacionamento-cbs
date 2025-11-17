@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Vehicle, ParkingLog, UniversityLink, VehicleType, EditHistoryLog } from '../types';
 import { EditFormData } from '../App';
@@ -5,7 +6,7 @@ import { EditFormData } from '../App';
 interface EditLogModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: EditFormData) => void;
+  onSave: (data: EditFormData) => Promise<void>;
   logToEdit: {
     log: ParkingLog;
     vehicle: Vehicle;
@@ -28,6 +29,8 @@ const EditLogModal: React.FC<EditLogModalProps> = ({ isOpen, onClose, onSave, lo
       date: '', entryTime: '', exitTime: ''
     }
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (logToEdit) {
@@ -46,6 +49,8 @@ const EditLogModal: React.FC<EditLogModalProps> = ({ isOpen, onClose, onSave, lo
           exitTime: logToEdit.log.exitTime || '',
         }
       });
+      setErrorMessage('');
+      setIsSaving(false);
     }
   }, [logToEdit]);
 
@@ -61,9 +66,18 @@ const EditLogModal: React.FC<EditLogModalProps> = ({ isOpen, onClose, onSave, lo
     setFormData(prev => ({ ...prev, log: { ...prev.log, [id]: value } }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    setIsSaving(true);
+    setErrorMessage('');
+    try {
+        await onSave(formData);
+    } catch (error) {
+        console.error("Erro ao salvar alterações:", error);
+        setErrorMessage('Ocorreu uma falha ao salvar. Tente novamente.');
+    } finally {
+        setIsSaving(false);
+    }
   };
   
   const formatHistoryTimestamp = (isoString: string) => {
@@ -162,9 +176,14 @@ const EditLogModal: React.FC<EditLogModalProps> = ({ isOpen, onClose, onSave, lo
                 </div>
             </div>
 
-            <div className="flex justify-end p-6 border-t bg-slate-50 rounded-b-lg">
-                <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 mr-2">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Salvar Alterações</button>
+            <div className="flex justify-end items-center p-6 border-t bg-slate-50 rounded-b-lg space-x-2">
+                {errorMessage && (
+                    <p className="text-sm text-red-600 mr-auto">{errorMessage}</p>
+                )}
+                <button type="button" onClick={onClose} disabled={isSaving} className="px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-50">Cancelar</button>
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
             </div>
         </form>
 
