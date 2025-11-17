@@ -24,6 +24,9 @@
     "**/*.ts",
     "**/*.tsx"
   ],
+  "exclude": [
+    "vite.config.ts"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
